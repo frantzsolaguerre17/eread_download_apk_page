@@ -131,15 +131,8 @@
 <script>
     const apkLink = "https://github.com/frantzsolaguerre17/eRead/releases/download/v1.0.0/eread.apk";
 
-    let count = localStorage.getItem("downloads") || 0;
-    document.getElementById("count").innerText = count;
-
     document.getElementById("downloadBtn").onclick = function () {
         window.location.href = apkLink;
-
-        count++;
-        localStorage.setItem("downloads", count);
-        document.getElementById("count").innerText = count;
     };
 </script>
 
