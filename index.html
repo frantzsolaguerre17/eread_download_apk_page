@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eRead - Téléchargement</title>
     <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -40,6 +41,7 @@
 
 
 <script>
+
     const SUPABASE_URL = "https://ujuswyzvftkkjklktwxv.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqdXN3eXp2ZnRra2prbGt0d3h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3OTg5NTcsImV4cCI6MjA3MzM3NDk1N30.7QGTmDz_yaGo4B4XXHBA71PivmTElC5Zx4sjpuv_w8Y";
     const apkLink = "https://github.com/frantzsolaguerre17/eread_download_apk_page/releases/download/v1.0.1/eread.apk";
@@ -75,6 +77,10 @@
 
 
     async function increaseCount() {
+
+        const current = Number(countEl.innerText || 0);
+        updateCount(current + 1);
+
         try {
             const res = await fetch(
                 `${"https://ujuswyzvftkkjklktwxv.supabase.co"}/rest/v1/rpc/increment_downloads`,
@@ -94,6 +100,8 @@
         } catch (err) {
             console.error("Erreur increaseCount:", err);
         }
+
+        setTimeout(loadCount, 800);
     }
 
 
@@ -111,12 +119,75 @@
         });
     }
 
-    /* =========================
-       4. Init page
+
+    /*=========================
+        ANIMATION COUNTER
     ========================= */
+    function updateCount(newValue) {
+        popEffect();
+        const current = Number(countEl.innerText || 0);
+
+        // animation simple
+        const duration = 600;
+        const steps = 30;
+        const increment = (newValue - current) / steps;
+
+        let i = 0;
+
+        const interval = setInterval(() => {
+            i++;
+            const value = Math.round(current + increment * i);
+            countEl.innerText = value;
+
+            if (i >= steps) {
+                clearInterval(interval);
+                countEl.innerText = newValue;
+            }
+        }, duration / steps);
+
+    }
+
+
+    function subscribeToChanges() {
+        const supabase = window.supabase.createClient(
+            "https://ujuswyzvftkkjklktwxv.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqdXN3eXp2ZnRra2prbGt0d3h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3OTg5NTcsImV4cCI6MjA3MzM3NDk1N30.7QGTmDz_yaGo4B4XXHBA71PivmTElC5Zx4sjpuv_w8Y"
+        );
+
+        supabase
+            .channel('apk_downloads_channel')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'apk_downloads'
+                },
+                (payload) => {
+                    console.log("Change detected:", payload);
+
+                    const newCount = payload.new.count;
+                    updateCount(newCount);
+                }
+            )
+            .subscribe();
+    }
+
+    function popEffect() {
+        countEl.classList.add("pop");
+        setTimeout(() => countEl.classList.remove("pop"), 200);
+    }
+
+
+    /* =========================
+      Init page
+   ========================= */
     document.addEventListener("DOMContentLoaded", () => {
         loadCount();
+        subscribeToChanges();
+
     });
+
 </script>
 
 </body>

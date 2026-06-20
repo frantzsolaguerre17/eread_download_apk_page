@@ -71,7 +71,7 @@ p {
 /* COUNTER */
 .counter {
     margin-top: 15px;
-    font-size: 13px;
+    font-size: 15px;
     opacity: 0.9;
 }
 
@@ -115,4 +115,15 @@ p {
     line-height: 1.5;
     color: white;
     opacity: 0.95;
+}
+
+
+#count {
+    font-size: 22px;
+    font-weight: bold;
+    transition: transform 0.2s ease;
+}
+
+#count.pop {
+    transform: scale(1.3);
 }
